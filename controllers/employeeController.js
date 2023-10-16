@@ -17,31 +17,45 @@ exports.addEmployee = async (req, res) => {
 };
 
 exports.getEmployees = async (req, res) => {
+    const { filter, sort } = req.query;
+
     try {
-        const employees = await Employee.find();
-        return res.status(200).json(employees);
+      let query = {};
+  
+      if (filter && ['Tech', 'Marketing', 'Operations'].includes(filter)) {
+        query.department = filter;
+      }
+  
+      let sortOption = 'salary';
+      if (sort === 'Descending') {
+        sortOption = '-' + sortOption;
+      }
+  
+      const employees = await Employee.find(query).sort(sortOption);
+  
+      res.status(200).json(employees);
     } catch (error) {
-        return res.status(404).json(error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-}
+};
 
 exports.deleteEmployee = async (req, res) => {
-    const {id} = req.params;
-    try {
-        const to_delete = await Employee.findByIdAndRemove(id);
-        return res.status(200).json({message: "Deleted", to_delete});
-    } catch (error) {
-        return res.status(404).json(error);
-    }
-}
+  const { id } = req.params;
+  try {
+    const to_delete = await Employee.findByIdAndRemove(id);
+    return res.status(200).json({ message: "Deleted", to_delete });
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
 
 exports.updateEmployee = async (req, res) => {
-    const body = req.body;
-    const {id} = req.params;
-    try {
-        const to_delete = await Employee.findByIdAndUpdate(id, body);
-        return res.status(200).json({message: "Updated", to_delete});
-    } catch (error) {
-        return res.status(404).json(error);
-    }
-}
+  const body = req.body;
+  const { id } = req.params;
+  try {
+    const to_delete = await Employee.findByIdAndUpdate(id, body);
+    return res.status(200).json({ message: "Updated", to_delete });
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
